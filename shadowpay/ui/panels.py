@@ -16,8 +16,8 @@ from .formatters import (
     format_state,
 )
 
-
 # ── Balance ─────────────────────────────────────────────────────────────────
+
 
 def build_balance_panel(balance: Any) -> Panel:
     """User balance panel."""
@@ -59,6 +59,7 @@ def build_merchant_balance_panel(balance: Any) -> Panel:
 
 # ── Item Detail ─────────────────────────────────────────────────────────────
 
+
 def build_item_detail_panel(item: Any, *, is_seller_online: bool = False) -> Panel:
     """Detailed item view with sticker info."""
     info = Table.grid(padding=(0, 2))
@@ -78,8 +79,7 @@ def build_item_detail_panel(item: Any, *, is_seller_online: bool = False) -> Pan
         info.add_row("Suggested:", format_price(si.suggested_price))
         if si.liquidity is not None:
             info.add_row("Liquidity:", format_liquidity(si.liquidity))
-        info.add_row("StatTrak™:", Text("Yes" if si.is_stattrak else "No",
-                                        style="bright_red" if si.is_stattrak else "dim"))
+        info.add_row("StatTrak™:", Text("Yes" if si.is_stattrak else "No", style="bright_red" if si.is_stattrak else "dim"))
 
     info.add_row("", Text(""))  # Spacer
     info.add_row("Item ID:", Text(str(item.id), style="bright_blue"))
@@ -98,8 +98,7 @@ def build_item_detail_panel(item: Any, *, is_seller_online: bool = False) -> Pan
     seller_text = "Online" if is_seller_online else "Offline"
     info.add_row(
         "Seller:",
-        Text(f"{seller_icon} {seller_text}",
-             style="bright_green" if is_seller_online else "dim red"),
+        Text(f"{seller_icon} {seller_text}", style="bright_green" if is_seller_online else "dim red"),
     )
 
     # Stickers
@@ -134,6 +133,7 @@ def build_item_detail_panel(item: Any, *, is_seller_online: bool = False) -> Pan
 
 # ── Offer Detail ────────────────────────────────────────────────────────────
 
+
 def build_offer_detail_panel(offer: Any, *, is_seller_online: bool = False) -> Panel:
     """Detailed offer view."""
     info = Table.grid(padding=(0, 2))
@@ -158,8 +158,7 @@ def build_offer_detail_panel(offer: Any, *, is_seller_online: bool = False) -> P
     seller_text = "Online" if is_seller_online else "Offline"
     info.add_row(
         "Seller:",
-        Text(f"{seller_icon} {seller_text}",
-             style="bright_green" if is_seller_online else "dim red"),
+        Text(f"{seller_icon} {seller_text}", style="bright_green" if is_seller_online else "dim red"),
     )
 
     title_text = f"📋 {name}" if name else "📋 Offer Detail"
@@ -185,9 +184,7 @@ _EVENT_STYLES: dict[str, tuple[str, str]] = {
 
 def build_ws_event_panel(event: Any) -> Panel:
     """Compact panel for a WebSocket event."""
-    icon, colour = _EVENT_STYLES.get(
-        event.event_type, ("📨", "white")
-    )
+    icon, colour = _EVENT_STYLES.get(event.event_type, ("📨", "white"))
 
     info = Table.grid(padding=(0, 2))
     info.add_column(style="bold bright_white", justify="right")

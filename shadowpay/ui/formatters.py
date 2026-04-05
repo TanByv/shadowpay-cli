@@ -6,8 +6,8 @@ from datetime import datetime
 
 from rich.text import Text
 
-
 # ── Price ───────────────────────────────────────────────────────────────────
+
 
 def format_price(value: float | None, *, currency: str = "$") -> Text:
     """Format a monetary value with colour based on magnitude."""
@@ -93,6 +93,7 @@ def format_trade_offer_state(state: str | None) -> Text:
 
 # ── Date ────────────────────────────────────────────────────────────────────
 
+
 def format_date(date_str: str | None) -> Text:
     """Format an API date string into a readable form."""
     if not date_str:
@@ -105,6 +106,7 @@ def format_date(date_str: str | None) -> Text:
 
 
 # ── Liquidity ───────────────────────────────────────────────────────────────
+
 
 def format_liquidity(value: float | None) -> Text:
     """Liquidity percentage with colour coding."""
