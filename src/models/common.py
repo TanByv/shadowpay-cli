@@ -115,7 +115,7 @@ T = TypeVar("T")
 class ApiResponse(BaseModel, Generic[T]):
     """Generic wrapper for every Shadowpay API response.
 
-    The ``data`` field is generic – callers specify the concrete type.
+    The ``data`` field is generic - callers specify the concrete type.
     """
 
     status: ResponseStatus = ResponseStatus.SUCCESS

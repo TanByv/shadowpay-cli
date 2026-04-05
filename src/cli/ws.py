@@ -1,4 +1,4 @@
-"""WebSocket live-stream subcommand – real-time marketplace events."""
+"""WebSocket live-stream subcommand - real-time marketplace events."""
 
 from __future__ import annotations
 

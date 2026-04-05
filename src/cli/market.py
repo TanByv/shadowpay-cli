@@ -1,4 +1,4 @@
-"""Market browsing subcommands – unified view across user/merchant item APIs."""
+"""Market browsing subcommands - unified view across user/merchant item APIs."""
 
 from __future__ import annotations
 

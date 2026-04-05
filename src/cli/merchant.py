@@ -1,4 +1,4 @@
-"""Merchant subcommands – balance, currency, items, buy, operations."""
+"""Merchant subcommands - balance, currency, items, buy, operations."""
 
 from __future__ import annotations
 

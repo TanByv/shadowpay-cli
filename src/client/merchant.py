@@ -1,4 +1,4 @@
-"""Merchant API client – wraps all ``/merchant/*`` endpoints."""
+"""Merchant API client - wraps all ``/merchant/*`` endpoints."""
 
 from __future__ import annotations
 
@@ -19,21 +19,21 @@ class MerchantClient:
     # ── Balance ─────────────────────────────────────────────────────────────
 
     async def get_balance(self) -> MerchantBalance:
-        """GET /merchant/balance – merchant account balance."""
+        """GET /merchant/balance - merchant account balance."""
         resp = await self._http.get("/merchant/balance")
         return MerchantBalance.model_validate(resp.get("data", {}))
 
     # ── Currency ────────────────────────────────────────────────────────────
 
     async def set_currency(self, name: str, rate: float) -> dict[str, Any]:
-        """POST /merchant/currency – set custom currency."""
+        """POST /merchant/currency - set custom currency."""
         return await self._http.post(
             "/merchant/currency",
             json_body={"name": name, "rate": rate},
         )
 
     async def disable_currency(self) -> dict[str, Any]:
-        """DELETE /merchant/currency – disable custom currency."""
+        """DELETE /merchant/currency - disable custom currency."""
         return await self._http.delete("/merchant/currency")
 
     # ── Items ───────────────────────────────────────────────────────────────
@@ -58,7 +58,7 @@ class MerchantClient:
         phases: list[str] | None = None,
         ids: list[int] | None = None,
     ) -> tuple[list[Item], dict[str, Any]]:
-        """GET /merchant/items – list marketplace items."""
+        """GET /merchant/items - list marketplace items."""
         params: dict[str, Any] = {
             "project": project,
             "search": search,
@@ -90,7 +90,7 @@ class MerchantClient:
         return items, metadata
 
     async def get_item(self, item_id: int | str) -> tuple[Item | None, bool]:
-        """GET /merchant/items/{id} – single item detail."""
+        """GET /merchant/items/{id} - single item detail."""
         resp = await self._http.get(f"/merchant/items/{item_id}")
         data = resp.get("data", {})
         if not data:
@@ -106,7 +106,7 @@ class MerchantClient:
         project: str | None = None,
         phases: list[str] | None = None,
     ) -> list[ItemPrice]:
-        """GET /merchant/items/prices – item price/volume data."""
+        """GET /merchant/items/prices - item price/volume data."""
         params: dict[str, Any] = {"project": project}
         if phases:
             params["phases"] = phases
@@ -124,7 +124,7 @@ class MerchantClient:
         limit: int | None = None,
         offset: int | None = None,
     ) -> tuple[list[SteamItem], dict[str, Any]]:
-        """GET /merchant/items/steam – steam item catalog."""
+        """GET /merchant/items/steam - steam item catalog."""
         params: dict[str, Any] = {
             "project": project,
             "search": search,
@@ -152,7 +152,7 @@ class MerchantClient:
         custom_id: str | None = None,
         price: float | None = None,
     ) -> BuyResult:
-        """POST /merchant/items/buy – buy item by ID."""
+        """POST /merchant/items/buy - buy item by ID."""
         body: dict[str, Any] = {
             "id": item_id,
             "steamid": steamid,
@@ -176,7 +176,7 @@ class MerchantClient:
         custom_id: str | None = None,
         phase: str | None = None,
     ) -> BuyResult:
-        """POST /merchant/items/buy-for – buy by name + price."""
+        """POST /merchant/items/buy-for - buy by name + price."""
         body: dict[str, Any] = {
             "steam_market_hash_name": steam_market_hash_name,
             "price": price,
@@ -209,7 +209,7 @@ class MerchantClient:
         steamid: str | None = None,
         ids: list[int] | None = None,
     ) -> tuple[list[Operation], dict[str, Any]]:
-        """GET /merchant/operations – operations history."""
+        """GET /merchant/operations - operations history."""
         params: dict[str, Any] = {
             "type": type_filter,
             "date_from": date_from,

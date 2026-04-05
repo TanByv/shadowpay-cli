@@ -126,7 +126,7 @@ shadowpay-cli/
 ├── main.py                  # Entry point
 ├── pyproject.toml
 ├── .env.example
-└── shadowpay_cli/
+└── src/
     ├── config.py            # Settings from .env
     ├── models/              # Pydantic v2 API models
     │   ├── common.py        # Enums, pagination, ApiResponse

@@ -1,4 +1,4 @@
-"""User subcommands – balance, inventory, items, offers, operations, token."""
+"""User subcommands - balance, inventory, items, offers, operations, token."""
 
 from __future__ import annotations
 

@@ -108,7 +108,7 @@ class ShadowpayWebSocket:
         except Exception:
             pass
 
-        # Concatenated JSON – split by finding object boundaries
+        # Concatenated JSON - split by finding object boundaries
         depth = 0
         start = 0
         for i, ch in enumerate(text):

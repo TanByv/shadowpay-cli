@@ -1,6 +1,6 @@
-"""Shadowpay CLI – entry point."""
+"""Shadowpay CLI entry point."""
 
-from shadowpay.cli.app import create_app
+from src.cli.app import create_app
 
 app = create_app()
 

@@ -1,4 +1,4 @@
-"""Value formatting utilities – prices, floats, dates, states."""
+"""Value formatting utilities - prices, floats, dates, states."""
 
 from __future__ import annotations
 

@@ -68,7 +68,7 @@ def async_command(func: F) -> Callable[..., Any]:
 
             console.print(
                 Panel(
-                    Text.from_markup(f"[bold red]API Error {exc.status_code}[/]\n\n" f"[white]{friendly_msg}[/]"),
+                    Text.from_markup(f"[bold red]API Error {exc.status_code}[/]\n\n[white]{friendly_msg}[/]"),
                     title="[bold red]⚠ Error[/]",
                     border_style="red",
                     padding=(1, 3),
@@ -83,9 +83,7 @@ def async_command(func: F) -> Callable[..., Any]:
             console.print("\n")
             console.print(
                 Panel(
-                    Text.from_markup(
-                        f"[bold red]Unexpected Exception[/]\n\n" f"[white]{type(exc).__name__}: {exc}[/]"
-                    ),
+                    Text.from_markup(f"[bold red]Unexpected Exception[/]\n\n[white]{type(exc).__name__}: {exc}[/]"),
                     title="[bold red]⚠ Error[/]",
                     border_style="red",
                     padding=(1, 3),
@@ -168,7 +166,7 @@ def create_app() -> typer.Typer:
 
     @app.callback(invoke_without_command=True)
     def main_callback(ctx: typer.Context) -> None:
-        """Shadowpay CLI – type a subcommand to get started."""
+        """Shadowpay CLI - type a subcommand to get started."""
         if ctx.invoked_subcommand is None:
             print_banner()
             console.print("[dim]Run [bold]shadowpay --help[/bold] to see all commands.[/]\n")
