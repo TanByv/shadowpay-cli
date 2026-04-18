@@ -175,6 +175,7 @@ def build_offer_detail_panel(offer: Any, *, is_seller_online: bool = False) -> P
 _EVENT_STYLES: dict[str, tuple[str, str]] = {
     "offer_created": ("🆕", "bright_green"),
     "offer_changed": ("🔄", "bright_yellow"),
+    "offer_deleted": ("🗑", "red"),
     "sendOffer": ("📤", "bright_blue"),
     "acceptOffer": ("✅", "bright_green"),
     "cancelOffer": ("❌", "red"),
@@ -197,13 +198,16 @@ def build_ws_event_panel(event: Any) -> Panel:
     offers = event.data.get("offers", [])
     if offers:
         for offer_data in offers[:3]:  # Show max 3
-            offer_name = offer_data.get("steam_market_hash_name", "—")
-            offer_price = offer_data.get("price")
-            price_text = f"${offer_price:.2f}" if offer_price else "—"
-            info.add_row(
-                "Item:",
-                Text(f"{offer_name}  {price_text}", style="white"),
-            )
+            if isinstance(offer_data, dict):
+                offer_name = offer_data.get("steam_market_hash_name", "—")
+                offer_price = offer_data.get("price")
+                price_text = f"${offer_price:.2f}" if offer_price else "—"
+                info.add_row(
+                    "Item:",
+                    Text(f"{offer_name}  {price_text}", style="white"),
+                )
+            else:
+                info.add_row("Item ID:", Text(str(offer_data), style="bright_blue"))
         if len(offers) > 3:
             info.add_row("", Text(f"  … and {len(offers) - 3} more", style="dim"))
 

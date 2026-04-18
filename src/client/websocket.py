@@ -52,11 +52,8 @@ EventCallback = Callable[[WsEvent], Awaitable[None]]
 class ShadowpayWebSocket:
     """Async WebSocket client for Shadowpay real-time events.
 
-    Usage::
-
-        ws = ShadowpayWebSocket(token, offers_token, url)
-        async for event in ws.listen():
-            print(event)
+    Handles multiple tokens by opening parallel connections if necessary
+    (e.g., separate tokens for private events and market offers).
     """
 
     def __init__(
@@ -77,6 +74,7 @@ class ShadowpayWebSocket:
         self._debug_log = debug_log
         self._running = False
         self._callbacks: list[EventCallback] = []
+        self._event_queue: asyncio.Queue[WsEvent] = asyncio.Queue()
 
     def on_event(self, callback: EventCallback) -> None:
         """Register a callback for incoming events."""
@@ -109,6 +107,8 @@ class ShadowpayWebSocket:
             if isinstance(obj, dict):
                 messages.append(obj)
                 return messages
+            if isinstance(obj, list):
+                return obj
         except Exception:
             pass
 
@@ -135,6 +135,8 @@ class ShadowpayWebSocket:
     def _extract_events(message: dict[str, Any]) -> list[WsEvent]:
         """Extract WsEvent objects from a Centrifugo message."""
         events: list[WsEvent] = []
+
+        # Handle publish messages
         result = message.get("result", {})
         if not result:
             return events
@@ -159,115 +161,101 @@ class ShadowpayWebSocket:
 
     # ── Connection ──────────────────────────────────────────────────────────
 
-    async def listen(self) -> AsyncIterator[WsEvent]:
-        """Connect and yield events. Auto-reconnects on failure."""
-        self._running = True
+    async def _connection_loop(self, name: str, token: str) -> None:
+        """Single connection loop for a specific token."""
         delay = self._reconnect_delay
 
         while self._running:
             try:
                 async with AsyncSession() as session:
+                    log.info("ws_connecting", name=name, url=self._url)
                     ws = await session.ws_connect(self._url)
-                    log.info("ws_connecting", url=self._url)
 
-                    # Authenticate with personal channel token
-                    auth_msg = orjson.dumps({"params": {"token": self._token}, "id": 1}).decode()
+                    # Handshake
+                    auth_msg = orjson.dumps({"params": {"token": token}, "id": 1}).decode()
                     if self._debug_log:
-                        log_raw_data("SEND", "WS", auth_msg)
+                        log_raw_data("SEND", f"WS[{name}]", auth_msg)
                     await ws.send(auth_msg)
 
                     # Read auth response
-                    auth_result: Any = await ws.recv()
-                    auth_payload = auth_result[0] if isinstance(auth_result, tuple) else auth_result
+                    raw = await ws.recv()
+                    if raw is None:
+                        raise ConnectionError("Connection closed during handshake")
 
-                    if self._debug_log and auth_payload:
-                        if isinstance(auth_payload, bytes):
-                            auth_text = auth_payload.decode("utf-8", errors="replace")
-                        else:
-                            auth_text = str(auth_payload)
-                        log_raw_data("RECV", "WS", auth_text)
-
-                    if auth_payload:
-                        # Ensure it's indexable (str/bytes)
-                        msg_str = auth_payload[:200] if hasattr(auth_payload, "__getitem__") else str(auth_payload)
-                        log.debug("ws_auth_response", data=msg_str)
-
-                    # Subscribe to offers channel using offers_token
-                    sub_msg = orjson.dumps(
-                        {
-                            "method": 1,
-                            "params": {
-                                "channel": "offers",
-                                "token": self._offers_token,
-                            },
-                            "id": 2,
-                        }
-                    ).decode()
+                    payload = raw[0] if isinstance(raw, tuple) else raw
+                    text = payload.decode("utf-8", errors="replace") if isinstance(payload, bytes) else str(payload)
                     if self._debug_log:
-                        log_raw_data("SEND", "WS", sub_msg)
-                    await ws.send(sub_msg)
+                        log_raw_data("RECV", f"WS[{name}]", text)
 
-                    sub_result: Any = await ws.recv()
-                    sub_payload = sub_result[0] if isinstance(sub_result, tuple) else sub_result
-                    if self._debug_log and sub_payload:
-                        if isinstance(sub_payload, bytes):
-                            sub_text = sub_payload.decode("utf-8", errors="replace")
-                        else:
-                            sub_text = str(sub_payload)
-                        log_raw_data("RECV", "WS", sub_text)
-                    if sub_payload:
-                        sub_msg_str = sub_payload[:200] if hasattr(sub_payload, "__getitem__") else str(sub_payload)
-                        log.debug("ws_sub_response", data=sub_msg_str)
+                    auth_data = orjson.loads(text)
+                    if "error" in auth_data:
+                        log.error("ws_auth_error", name=name, error=auth_data["error"])
+                        raise PermissionError(auth_data["error"].get("message"))
 
-                    log.info("ws_connected", url=self._url)
-                    delay = self._reconnect_delay  # Reset on success
+                    log.info("ws_connected", name=name)
+                    delay = self._reconnect_delay
 
                     # Main receive loop
                     while self._running:
-                        try:
-                            raw = await ws.recv()
-                            if self._debug_log and raw:
-                                pld = raw[0] if isinstance(raw, tuple) else raw
-                                if isinstance(pld, bytes):
-                                    txt = pld.decode("utf-8", errors="replace")
-                                elif isinstance(pld, str):
-                                    txt = pld
-                                else:
-                                    txt = str(pld)
-                                log_raw_data("RECV", "WS", txt)
-                        except Exception:
-                            log.warning("ws_recv_error")
-                            break
-
+                        raw = await ws.recv()
                         if raw is None:
-                            log.warning("ws_closed")
+                            log.warning("ws_closed", name=name)
                             break
 
-                        # Centrifugo / curl_cffi returns (payload, opcode)
                         payload = raw[0] if isinstance(raw, tuple) else raw
-
-                        if isinstance(payload, str):
-                            text = payload
-                        elif isinstance(payload, bytes):
-                            text = payload.decode("utf-8", errors="replace")
-                        else:
-                            text = str(payload)
+                        text = payload.decode("utf-8", errors="replace") if isinstance(payload, bytes) else str(payload)
+                        if self._debug_log:
+                            log_raw_data("RECV", f"WS[{name}]", text)
 
                         messages = self._parse_messages(text)
-
                         for msg in messages:
                             for event in self._extract_events(msg):
-                                await self._notify(event)
-                                yield event
+                                await self._event_queue.put(event)
 
-            except Exception:
-                log.exception("ws_connection_error")
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                log.warning("ws_loop_error", name=name, error=str(e))
 
             if self._running:
-                log.info("ws_reconnecting", delay=delay)
+                log.info("ws_reconnecting", name=name, delay=delay)
                 await asyncio.sleep(delay)
                 delay = min(delay * 2, self._max_reconnect_delay)
+
+    async def listen(self, feeds: list[str] | None = None) -> AsyncIterator[WsEvent]:
+        """Connect and yield events. Auto-reconnects on failure.
+
+        Args:
+            feeds: List of feeds to connect to ("account", "offers").
+                  By default, all available feeds are connected.
+        """
+        self._running = True
+        target_feeds = feeds if feeds is not None else ["account", "offers"]
+
+        # Start connection loops
+        tasks = []
+        if "account" in target_feeds:
+            tasks.append(asyncio.create_task(self._connection_loop("account", self._token)))
+        if "offers" in target_feeds:
+            tasks.append(asyncio.create_task(self._connection_loop("offers", self._offers_token)))
+
+        if not tasks:
+            log.warning("ws_no_feeds_selected")
+            self._running = False
+            return
+
+        try:
+            while self._running:
+                event = await self._event_queue.get()
+                await self._notify(event)
+                yield event
+        finally:
+            self._running = False
+            for t in tasks:
+                t.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
 
     def stop(self) -> None:
         """Signal the listen loop to stop."""
         self._running = False
+

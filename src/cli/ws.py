@@ -28,6 +28,8 @@ ws_app = typer.Typer(
 async def listen(
     max_events: Optional[int] = typer.Option(None, "--max", "-n", help="Stop after N events (default: unlimited)"),
     raw: bool = typer.Option(False, "--raw", help="Print raw JSON instead of formatted panels"),
+    offers: bool = typer.Option(False, "--offers", "-O", help="Also subscribe to global market offers"),
+    only_offers: bool = typer.Option(False, "--only-offers", help="Only subscribe to global market offers"),
 ) -> None:
     """Connect to Shadowpay WebSocket and stream live events.
 
@@ -71,9 +73,17 @@ async def listen(
             debug_log=cfg.shadowpay_debug_log,
         )
 
+        # Determine feeds
+        if only_offers:
+            selected_feeds = ["offers"]
+        elif offers:
+            selected_feeds = ["account", "offers"]
+        else:
+            selected_feeds = ["account"]
+
         event_count = 0
         try:
-            async for event in ws.listen():
+            async for event in ws.listen(feeds=selected_feeds):
                 event_count += 1
 
                 if raw:

@@ -95,28 +95,28 @@ ws auth               Show WebSocket auth tokens
 
 ```bash
 # Check your balance
-uv run python main.py user balance
+uv run main.py user balance
 
 # Browse CS2 items under $10
-uv run python main.py market browse --project csgo --price-to 10
+uv run main.py market browse --project csgo --price-to 10
 
 # Search for a specific skin
-uv run python main.py market search "AK-47 | Redline"
+uv run main.py market search "AK-47 | Redline"
 
 # List your active offers sorted by price
-uv run python main.py user offers --sort price --order asc
+uv run main.py user offers --sort price --order asc
 
 # Create a sell offer
-uv run python main.py user create-offer 12345678 25.50 --project csgo
+uv run main.py user create-offer 12345678 25.50 --project csgo
 
-# Stream live marketplace events
-uv run python main.py ws listen
+# Cancel multiple sell offers
+uv run main.py user cancel-offers 12345678 87654321
 
-# Stream events as raw JSON
-uv run python main.py ws listen --raw
+# Stream private account events (default)
+uv run main.py ws listen
 
-# Merchant: buy an item
-uv run python main.py merchant buy 12345 76561198xxxxx trade_token_here
+# Include global market offers stream
+uv run  main.py ws listen --offers
 ```
 
 ## Project Structure
@@ -171,4 +171,5 @@ shadowpay-cli/
 |---|---|---|---|
 | `SHADOWPAY_API_TOKEN` | ✅ | - | Bearer token for API auth |
 | `SHADOWPAY_BASE_URL` | ❌ | `https://api.shadowpay.com/api/v2` | API base URL |
+| `SHADOWPAY_DEBUG_LOG` | ❌ | `false` | Enable raw traffic logging to `debug_raw.log` |
 | `LOG_LEVEL` | ❌ | `INFO` | Logging level |
