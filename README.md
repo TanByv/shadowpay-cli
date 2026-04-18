@@ -6,13 +6,13 @@ A production-quality interactive CLI for the [Shadowpay V2 API](https://docs.sha
 
 ## Features
 
-- **Full API Coverage** — all User and Merchant V2 endpoints
-- **Real-time WebSocket** — live offer/trade event streaming (fully supported via `curl_cffi`)
-- **Rich Terminal UI** — colour-coded tables, panels, progress indicators
-- **Async Architecture** — `curl_cffi` with TLS impersonation & automatic WebSocket payload parsing
-- **Typed Models** — Pydantic v2 validation for every request/response
-- **Auto Retry** — exponential backoff on transient errors (429 / 5xx)
-- **Robustness** — automatic currency handling & PHP-compliant array parameter serialization
+- **Full API Coverage** - all User and Merchant V2 endpoints
+- **Real-time WebSocket** - live offer/trade event streaming (fully supported via `curl_cffi`)
+- **Rich Terminal UI** - colour-coded tables, panels, progress indicators
+- **Async Architecture** - `curl_cffi` with TLS impersonation & automatic WebSocket payload parsing
+- **Typed Models** - Pydantic v2 validation for every request/response
+- **Auto Retry** - exponential backoff on transient errors (429 / 5xx)
+- **Robustness** - automatic currency handling & array parameter serialization
 
 ## Quick Start
 
@@ -137,8 +137,8 @@ shadowpay-cli/
     │   └── merchant.py      # MerchantBalance, BuyRequest
     ├── client/              # Async API clients
     │   ├── http.py          # Base HTTP client (curl_cffi + tenacity)
-    │   ├── user.py          # UserClient — all /user/* endpoints
-    │   ├── merchant.py      # MerchantClient — all /merchant/*
+    │   ├── user.py          # UserClient - all /user/* endpoints
+    │   ├── merchant.py      # MerchantClient - all /merchant/*
     │   └── websocket.py     # Centrifugo WebSocket client
     ├── cli/                 # Typer command groups
     │   ├── app.py           # Root app, banner, async helper
