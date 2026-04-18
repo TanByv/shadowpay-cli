@@ -37,7 +37,11 @@ async def listen(
     import orjson
 
     cfg = load_settings()
-    http = ShadowpayHttpClient(cfg.shadowpay_api_token, cfg.shadowpay_base_url)
+    http = ShadowpayHttpClient(
+        cfg.shadowpay_api_token,
+        cfg.shadowpay_base_url,
+        debug_log=cfg.shadowpay_debug_log,
+    )
 
     try:
         await http.__aenter__()
@@ -64,6 +68,7 @@ async def listen(
             token=ws_auth.token,
             offers_token=ws_auth.offers_token,
             url=ws_auth.url,
+            debug_log=cfg.shadowpay_debug_log,
         )
 
         event_count = 0
@@ -95,7 +100,11 @@ async def listen(
 async def auth_info() -> None:
     """Show your WebSocket authentication tokens (for debugging)."""
     cfg = load_settings()
-    http = ShadowpayHttpClient(cfg.shadowpay_api_token, cfg.shadowpay_base_url)
+    http = ShadowpayHttpClient(
+        cfg.shadowpay_api_token,
+        cfg.shadowpay_base_url,
+        debug_log=cfg.shadowpay_debug_log,
+    )
 
     try:
         await http.__aenter__()

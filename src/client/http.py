@@ -15,6 +15,8 @@ from tenacity import (
     wait_exponential,
 )
 
+from .debug import log_raw_data
+
 log = structlog.get_logger()
 T = TypeVar("T", bound=BaseModel)
 
@@ -47,9 +49,10 @@ class ShadowpayHttpClient:
             data = await client.get("/user/balance")
     """
 
-    def __init__(self, token: str, base_url: str) -> None:
+    def __init__(self, token: str, base_url: str, debug_log: bool = False) -> None:
         self._token = token
         self._base_url = base_url.rstrip("/")
+        self._debug_log = debug_log
         self._session: AsyncSession | None = None
 
     async def __aenter__(self) -> ShadowpayHttpClient:
@@ -109,6 +112,20 @@ class ShadowpayHttpClient:
             kwargs["data"] = orjson.dumps(json_body)
 
         resp = await self._session.request(method, url, **kwargs)
+
+        if self._debug_log:
+            # Log request
+            req_data = f"{method} {url}\nHeaders: {kwargs['headers']}\n"
+            if "params" in kwargs:
+                req_data += f"Params: {kwargs['params']}\n"
+            if "data" in kwargs:
+                # kwargs['data'] is bytes from orjson.dumps
+                req_data += f"Body: {kwargs['data'].decode('utf-8')}\n"
+            log_raw_data("REQUEST", "HTTP", req_data)
+
+            # Log response
+            resp_data = f"Status: {resp.status_code}\nBody: {resp.text}\n"
+            log_raw_data("RESPONSE", "HTTP", resp_data)
 
         log.debug(
             "http_response",

@@ -25,6 +25,10 @@ class Settings(BaseSettings):
         default="INFO",
         description="Logging verbosity (DEBUG, INFO, WARNING, ERROR)",
     )
+    shadowpay_debug_log: bool = Field(
+        default=False,
+        description="Enable raw request/response logging to debug_raw.log",
+    )
 
     model_config = {
         "env_file": ".env",

@@ -22,7 +22,11 @@ market_app = typer.Typer(
 
 async def _user_client():
     cfg = load_settings()
-    http = ShadowpayHttpClient(cfg.shadowpay_api_token, cfg.shadowpay_base_url)
+    http = ShadowpayHttpClient(
+        cfg.shadowpay_api_token,
+        cfg.shadowpay_base_url,
+        debug_log=cfg.shadowpay_debug_log,
+    )
     await http.__aenter__()
     return http, UserClient(http)
 

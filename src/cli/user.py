@@ -31,7 +31,11 @@ user_app = typer.Typer(
 async def _user_client():
     """Create and return an entered HTTP client + UserClient."""
     cfg = load_settings()
-    http = ShadowpayHttpClient(cfg.shadowpay_api_token, cfg.shadowpay_base_url)
+    http = ShadowpayHttpClient(
+        cfg.shadowpay_api_token,
+        cfg.shadowpay_base_url,
+        debug_log=cfg.shadowpay_debug_log,
+    )
     await http.__aenter__()
     return http, UserClient(http)
 
@@ -88,7 +92,7 @@ async def items(
     limit: int = typer.Option(25, "--limit", "-l", help="Results per page"),
     offset: int = typer.Option(0, "--offset", help="Results offset"),
 ) -> None:
-    """List your items currently on sale."""
+    """Search and list items for sale on the marketplace."""
     http, client = await _user_client()
     try:
         with console.status("[bold cyan]Fetching items…"):
@@ -105,7 +109,7 @@ async def items(
         if not result:
             console.print("[yellow]No items found.[/]")
             return
-        console.print(build_items_table(result, title="Your Items on Sale"))
+        console.print(build_items_table(result, title="Marketplace Items"))
         total = metadata.get("total", len(result))
         console.print(f"[dim]Showing {len(result)} of {total} items (offset {offset})[/]")
     finally:
@@ -120,7 +124,7 @@ async def items(
 async def item_detail(
     item_id: int = typer.Argument(..., help="Item ID to look up"),
 ) -> None:
-    """Show detailed info for a single item."""
+    """Show detailed info for a single marketplace item."""
     http, client = await _user_client()
     try:
         with console.status("[bold cyan]Fetching item…"):
@@ -243,9 +247,7 @@ async def create_offer(
     """Create a sell offer for an inventory item."""
     http, client = await _user_client()
     try:
-        offer_data = {"id": asset_id, "price": price, "project": project}
-        if currency:
-            offer_data["currency"] = currency
+        offer_data = {"id": asset_id, "price": price, "project": project, "currency": currency or "USD"}
 
         console.print(f"[bold]Creating offer:[/] {asset_id} @ ${price:.2f} ({project})")
         if not Confirm.ask("[yellow]Proceed?[/]"):
@@ -274,9 +276,7 @@ async def update_offer(
     """Update the price on an active offer."""
     http, client = await _user_client()
     try:
-        update_data = {"id": offer_id, "price": price}
-        if currency:
-            update_data["currency"] = currency
+        update_data = {"id": offer_id, "price": price, "currency": currency or "USD"}
 
         with console.status("[bold cyan]Updating offer…"):
             result = await client.update_offers([update_data])

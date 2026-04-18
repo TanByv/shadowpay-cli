@@ -164,7 +164,7 @@ class UserClient:
 
     async def cancel_offers(self, item_ids: list[int]) -> CancelResult:
         """DELETE /user/offers - cancel specific offers (up to 100)."""
-        resp = await self._http.delete("/user/offers", params={"item_ids": item_ids})
+        resp = await self._http.delete("/user/offers", params={"item_ids[]": item_ids})
         return CancelResult.model_validate(resp)
 
     async def cancel_all_offers(self) -> CancelResult:

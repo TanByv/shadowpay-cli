@@ -13,6 +13,8 @@ import orjson
 import structlog
 from curl_cffi.requests import AsyncSession
 
+from .debug import log_raw_data
+
 log = structlog.get_logger()
 
 # ── Event types ─────────────────────────────────────────────────────────────
@@ -65,12 +67,14 @@ class ShadowpayWebSocket:
         *,
         reconnect_delay: float = 2.0,
         max_reconnect_delay: float = 60.0,
+        debug_log: bool = False,
     ) -> None:
         self._token = token
         self._offers_token = offers_token
         self._url = url
         self._reconnect_delay = reconnect_delay
         self._max_reconnect_delay = max_reconnect_delay
+        self._debug_log = debug_log
         self._running = False
         self._callbacks: list[EventCallback] = []
 
@@ -168,11 +172,20 @@ class ShadowpayWebSocket:
 
                     # Authenticate with personal channel token
                     auth_msg = orjson.dumps({"params": {"token": self._token}, "id": 1}).decode()
+                    if self._debug_log:
+                        log_raw_data("SEND", "WS", auth_msg)
                     await ws.send(auth_msg)
 
                     # Read auth response
                     auth_result: Any = await ws.recv()
-                    auth_payload = auth_result[1] if isinstance(auth_result, tuple) else auth_result
+                    auth_payload = auth_result[0] if isinstance(auth_result, tuple) else auth_result
+
+                    if self._debug_log and auth_payload:
+                        if isinstance(auth_payload, bytes):
+                            auth_text = auth_payload.decode("utf-8", errors="replace")
+                        else:
+                            auth_text = str(auth_payload)
+                        log_raw_data("RECV", "WS", auth_text)
 
                     if auth_payload:
                         # Ensure it's indexable (str/bytes)
@@ -190,10 +203,18 @@ class ShadowpayWebSocket:
                             "id": 2,
                         }
                     ).decode()
+                    if self._debug_log:
+                        log_raw_data("SEND", "WS", sub_msg)
                     await ws.send(sub_msg)
 
                     sub_result: Any = await ws.recv()
-                    sub_payload = sub_result[1] if isinstance(sub_result, tuple) else sub_result
+                    sub_payload = sub_result[0] if isinstance(sub_result, tuple) else sub_result
+                    if self._debug_log and sub_payload:
+                        if isinstance(sub_payload, bytes):
+                            sub_text = sub_payload.decode("utf-8", errors="replace")
+                        else:
+                            sub_text = str(sub_payload)
+                        log_raw_data("RECV", "WS", sub_text)
                     if sub_payload:
                         sub_msg_str = sub_payload[:200] if hasattr(sub_payload, "__getitem__") else str(sub_payload)
                         log.debug("ws_sub_response", data=sub_msg_str)
@@ -205,6 +226,15 @@ class ShadowpayWebSocket:
                     while self._running:
                         try:
                             raw = await ws.recv()
+                            if self._debug_log and raw:
+                                pld = raw[0] if isinstance(raw, tuple) else raw
+                                if isinstance(pld, bytes):
+                                    txt = pld.decode("utf-8", errors="replace")
+                                elif isinstance(pld, str):
+                                    txt = pld
+                                else:
+                                    txt = str(pld)
+                                log_raw_data("RECV", "WS", txt)
                         except Exception:
                             log.warning("ws_recv_error")
                             break
@@ -213,8 +243,8 @@ class ShadowpayWebSocket:
                             log.warning("ws_closed")
                             break
 
-                        # Centrifugo / curl_cffi returns (opcode, payload)
-                        payload = raw[1] if isinstance(raw, tuple) else raw
+                        # Centrifugo / curl_cffi returns (payload, opcode)
+                        payload = raw[0] if isinstance(raw, tuple) else raw
 
                         if isinstance(payload, str):
                             text = payload

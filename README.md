@@ -7,12 +7,12 @@ A production-quality interactive CLI for the [Shadowpay V2 API](https://docs.sha
 ## Features
 
 - **Full API Coverage** — all User and Merchant V2 endpoints
-- **Real-time WebSocket** — live offer/trade event streaming via Centrifugo
+- **Real-time WebSocket** — live offer/trade event streaming (fully supported via `curl_cffi`)
 - **Rich Terminal UI** — colour-coded tables, panels, progress indicators
-- **Async Architecture** — `curl_cffi` with TLS impersonation + `asyncio`
+- **Async Architecture** — `curl_cffi` with TLS impersonation & automatic WebSocket payload parsing
 - **Typed Models** — Pydantic v2 validation for every request/response
 - **Auto Retry** — exponential backoff on transient errors (429 / 5xx)
-- **Structured Logging** — `structlog` for machine-readable logs
+- **Robustness** — automatic currency handling & PHP-compliant array parameter serialization
 
 ## Quick Start
 
@@ -44,8 +44,8 @@ uv run python main.py --help
 ```
 user balance          Show account balance
 user inventory        List Steam inventory
-user items            List items on sale (with filters)
-user item <id>        Inspect a single item
+user items            Search/list marketplace items (with filters)
+user item <id>        Inspect a marketplace item
 user steam-items      Browse Steam item catalog
 user prices           Show price/volume data
 user offers           List active sell offers
