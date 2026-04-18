@@ -169,6 +169,6 @@ shadowpay-cli/
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `SHADOWPAY_API_TOKEN` | ✅ | — | Bearer token for API auth |
+| `SHADOWPAY_API_TOKEN` | ✅ | - | Bearer token for API auth |
 | `SHADOWPAY_BASE_URL` | ❌ | `https://api.shadowpay.com/api/v2` | API base URL |
 | `LOG_LEVEL` | ❌ | `INFO` | Logging level |
