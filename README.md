@@ -1,6 +1,6 @@
 # Shadowpay CLI
 
-A production-quality interactive CLI for the [Shadowpay V2 API](https://docs.shadowpay.com), built with Python.
+An interactive CLI for the [Shadowpay V2 API](https://docs.shadowpay.com), built with Python.
 
 ![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue)
 
