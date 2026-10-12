@@ -1,18 +1,18 @@
 # Shadowpay CLI
 
-A production-quality interactive CLI for the [Shadowpay V2 API](https://docs.shadowpay.com), built with modern Python.
+A production-quality interactive CLI for the [Shadowpay V2 API](https://docs.shadowpay.com), built with Python.
 
 ![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue)
 
 ## Features
 
-- **Full API Coverage** - all User and Merchant V2 endpoints
-- **Real-time WebSocket** - live offer/trade event streaming (fully supported via `curl_cffi`)
-- **Rich Terminal UI** - colour-coded tables, panels, progress indicators
-- **Async Architecture** - `curl_cffi` with TLS impersonation & automatic WebSocket payload parsing
-- **Typed Models** - Pydantic v2 validation for every request/response
-- **Auto Retry** - exponential backoff on transient errors (429 / 5xx)
-- **Robustness** - automatic currency handling & array parameter serialization
+- Full API Coverage - all User and Merchant V2 endpoints
+- Real-time WebSocket - live offer/trade event streaming (fully supported via `curl_cffi`)
+- Rich Terminal UI - colour-coded tables, panels, progress indicators
+- Async Architecture - `curl_cffi` with TLS impersonation & automatic WebSocket payload parsing
+- Typed Models - Pydantic v2 validation for every request/response
+- Auto Retry - exponential backoff on transient errors (429 / 5xx)
+- Robustness - automatic currency handling & array parameter serialization
 
 ## Quick Start
 
@@ -169,7 +169,7 @@ shadowpay-cli/
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `SHADOWPAY_API_TOKEN` | ✅ | - | Bearer token for API auth |
-| `SHADOWPAY_BASE_URL` | ❌ | `https://api.shadowpay.com/api/v2` | API base URL |
-| `SHADOWPAY_DEBUG_LOG` | ❌ | `false` | Enable raw traffic logging to `debug_raw.log` |
-| `LOG_LEVEL` | ❌ | `INFO` | Logging level |
+| `SHADOWPAY_API_TOKEN` | yes | - | Bearer token for API auth |
+| `SHADOWPAY_BASE_URL` | no | `https://api.shadowpay.com/api/v2` | API base URL |
+| `SHADOWPAY_DEBUG_LOG` | no | `false` | Enable raw traffic logging to `debug_raw.log` |
+| `LOG_LEVEL` | no | `INFO` | Logging level |
